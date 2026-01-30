@@ -42,7 +42,6 @@ export default function ForumScroll() {
             localIndex = index - (ENTRANCE_FRAMES + STAIRS_FRAMES) + 1;
         }
 
-        // Ensure strict 3-digit padding: ezgif-frame-001.jpg
         const filename = `ezgif-frame-${localIndex.toString().padStart(3, "0")}.jpg`;
         return `/assets/${folder}/${filename}`;
     };
@@ -51,7 +50,6 @@ export default function ForumScroll() {
         const imgArray: HTMLImageElement[] = new Array(TOTAL_FRAMES);
         let count = 0;
 
-        // Preload all images
         for (let i = 0; i < TOTAL_FRAMES; i++) {
             const img = new Image();
             img.src = getFrameData(i);
@@ -62,10 +60,10 @@ export default function ForumScroll() {
                 if (count === TOTAL_FRAMES) setLoading(false);
             };
             img.onerror = () => {
-                console.warn(`Frame missing: ${img.src}`);
-                count++;
-                setLoadedCount(count);
-                if (count === TOTAL_FRAMES) setLoading(false);
+                console.warn(`Frame missing or broken: ${img.src}`);
+                setLoadedCount(prev => prev + 1);
+                // Do not block loading, just skip
+                if (count + 1 >= TOTAL_FRAMES) setLoading(false);
             };
             imgArray[i] = img;
         }
@@ -73,10 +71,29 @@ export default function ForumScroll() {
     }, []);
 
     useEffect(() => {
-        const unsubscribe = smoothProgress.on("change", (latest) => {
+        const renderFrame = (latest: number) => {
             const canvas = canvasRef.current;
-            const ctx = canvas?.getContext("2d", { alpha: false }); // Optimization
+            const ctx = canvas?.getContext("2d", { alpha: false });
             if (!canvas || !ctx || images.length !== TOTAL_FRAMES) return;
+
+            // Device Pixel Ratio for Retina Displays
+            const dpr = window.devicePixelRatio || 1;
+
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            // Resize logic using physical pixels
+            if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                ctx.scale(dpr, dpr); // Scale context to match
+            }
+
+            // Ensure style matches window size
+            if (canvas.style.width !== `${width}px` || canvas.style.height !== `${height}px`) {
+                canvas.style.width = `${width}px`;
+                canvas.style.height = `${height}px`;
+            }
 
             // Force High Quality Smoothing
             ctx.imageSmoothingEnabled = true;
@@ -89,34 +106,31 @@ export default function ForumScroll() {
             );
 
             const img = images[frameIndex];
+            // Check naturalWidth to avoid drawing broken images
             if (img && img.complete && img.naturalWidth > 0) {
-                // Set canvas to full window size dynamically
-                if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-                    canvas.width = window.innerWidth;
-                    canvas.height = window.innerHeight;
-                    // Re-apply smoothing after resize
-                    ctx.imageSmoothingEnabled = true;
-                    ctx.imageSmoothingQuality = "high";
-                }
-
-                // "Cover" logic
-                const hRatio = canvas.width / img.width;
-                const vRatio = canvas.height / img.height;
+                // "Cover" logic (using logical width/height)
+                const hRatio = width / img.width;
+                const vRatio = height / img.height;
                 const ratio = Math.max(hRatio, vRatio);
-                const centerShift_x = (canvas.width - img.width * ratio) / 2;
-                const centerShift_y = (canvas.height - img.height * ratio) / 2;
+                const centerShift_x = (width - img.width * ratio) / 2;
+                const centerShift_y = (height - img.height * ratio) / 2;
 
+                ctx.clearRect(0, 0, width, height);
                 ctx.drawImage(
                     img,
                     0, 0, img.width, img.height,
                     centerShift_x, centerShift_y, img.width * ratio, img.height * ratio
                 );
             }
+        };
+
+        const unsubscribe = smoothProgress.on("change", (latest) => {
+            requestAnimationFrame(() => renderFrame(latest));
         });
 
         // Initial Render
         if (!loading && images.length === TOTAL_FRAMES) {
-            smoothProgress.set(0);
+            renderFrame(smoothProgress.get());
         }
 
         return () => unsubscribe();
@@ -126,13 +140,15 @@ export default function ForumScroll() {
         const progress = (loadedCount / TOTAL_FRAMES) * 100;
         return (
             <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-forum-black">
-                {/* Minimalist Gold Progress Bar */}
-                <div className="w-64 h-0.5 bg-gray-900 overflow-hidden">
+                <div className="w-64 h-0.5 bg-gray-900 overflow-hidden relative">
                     <div
-                        className="h-full bg-forum-gold transition-all duration-200 ease-out"
+                        className="absolute top-0 left-0 h-full bg-forum-gold transition-all duration-200 ease-out"
                         style={{ width: `${progress}%` }}
                     />
                 </div>
+                <p className="mt-4 text-[10px] text-forum-gold/60 font-sans tracking-[0.2em] uppercase">
+                    Loading Experience
+                </p>
             </div>
         );
     }

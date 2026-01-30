@@ -11,6 +11,13 @@
 body {
   color: var(--foreground);
   background: var(--background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: var(--gold);
+  color: #050505;
 }
 
 @layer utilities {

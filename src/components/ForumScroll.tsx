@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useScroll, useSpring } from "framer-motion";
 
+// Configuration Constants
 const ENTRANCE_FRAMES = 40;
 const STAIRS_FRAMES = 32;
 const SECOND_FLOOR_FRAMES = 24;
 const TOTAL_FRAMES = ENTRANCE_FRAMES + STAIRS_FRAMES + SECOND_FLOOR_FRAMES; // 96
+const SCROLL_DAMPING = 40; // Heavy, premium feel
 
 export default function ForumScroll() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -16,10 +18,9 @@ export default function ForumScroll() {
 
     const { scrollYProgress } = useScroll();
 
-    // Adjusted damping to 40 for heavier feel
     const smoothProgress = useSpring(scrollYProgress, {
         stiffness: 100,
-        damping: 40,
+        damping: SCROLL_DAMPING,
         restDelta: 0.001,
     });
 
@@ -28,16 +29,20 @@ export default function ForumScroll() {
         let localIndex = 0;
 
         if (index < ENTRANCE_FRAMES) {
+            // 0 - 39
             folder = "entrance";
             localIndex = index + 1;
         } else if (index < ENTRANCE_FRAMES + STAIRS_FRAMES) {
+            // 40 - 71
             folder = "stairs";
             localIndex = index - ENTRANCE_FRAMES + 1;
         } else {
+            // 72 - 95
             folder = "second-floor";
             localIndex = index - (ENTRANCE_FRAMES + STAIRS_FRAMES) + 1;
         }
 
+        // Ensure strict 3-digit padding: ezgif-frame-001.jpg
         const filename = `ezgif-frame-${localIndex.toString().padStart(3, "0")}.jpg`;
         return `/assets/${folder}/${filename}`;
     };
@@ -46,6 +51,7 @@ export default function ForumScroll() {
         const imgArray: HTMLImageElement[] = new Array(TOTAL_FRAMES);
         let count = 0;
 
+        // Preload all images
         for (let i = 0; i < TOTAL_FRAMES; i++) {
             const img = new Image();
             img.src = getFrameData(i);
@@ -56,7 +62,8 @@ export default function ForumScroll() {
                 if (count === TOTAL_FRAMES) setLoading(false);
             };
             img.onerror = () => {
-                count++; // Proceed anyway
+                console.warn(`Frame missing: ${img.src}`);
+                count++;
                 setLoadedCount(count);
                 if (count === TOTAL_FRAMES) setLoading(false);
             };
@@ -68,13 +75,14 @@ export default function ForumScroll() {
     useEffect(() => {
         const unsubscribe = smoothProgress.on("change", (latest) => {
             const canvas = canvasRef.current;
-            const ctx = canvas?.getContext("2d");
+            const ctx = canvas?.getContext("2d", { alpha: false }); // Optimization
             if (!canvas || !ctx || images.length !== TOTAL_FRAMES) return;
 
-            // Enable High Quality Scaling
+            // Force High Quality Smoothing
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = "high";
 
+            // Clamp frame index
             const frameIndex = Math.min(
                 TOTAL_FRAMES - 1,
                 Math.floor(latest * TOTAL_FRAMES)
@@ -82,16 +90,22 @@ export default function ForumScroll() {
 
             const img = images[frameIndex];
             if (img && img.complete && img.naturalWidth > 0) {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+                // Set canvas to full window size dynamically
+                if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    // Re-apply smoothing after resize
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = "high";
+                }
 
+                // "Cover" logic
                 const hRatio = canvas.width / img.width;
                 const vRatio = canvas.height / img.height;
                 const ratio = Math.max(hRatio, vRatio);
                 const centerShift_x = (canvas.width - img.width * ratio) / 2;
                 const centerShift_y = (canvas.height - img.height * ratio) / 2;
 
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(
                     img,
                     0, 0, img.width, img.height,
@@ -100,7 +114,8 @@ export default function ForumScroll() {
             }
         });
 
-        if (!loading && images.length > 0) {
+        // Initial Render
+        if (!loading && images.length === TOTAL_FRAMES) {
             smoothProgress.set(0);
         }
 
@@ -111,14 +126,12 @@ export default function ForumScroll() {
         const progress = (loadedCount / TOTAL_FRAMES) * 100;
         return (
             <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-forum-black">
-                <div className="w-64 h-1 bg-gray-800 rounded-full overflow-hidden">
+                {/* Minimalist Gold Progress Bar */}
+                <div className="w-64 h-0.5 bg-gray-900 overflow-hidden">
                     <div
-                        className="h-full bg-forum-gold transition-all duration-300 ease-out"
+                        className="h-full bg-forum-gold transition-all duration-200 ease-out"
                         style={{ width: `${progress}%` }}
                     />
-                </div>
-                <div className="mt-4 text-forum-gold font-serif text-sm tracking-widest">
-                    LOADING EXPERIENCE
                 </div>
             </div>
         );

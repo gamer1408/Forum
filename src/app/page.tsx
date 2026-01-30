@@ -16,10 +16,10 @@ export default function Home() {
   const opacity2 = useTransform(scrollYProgress, [0.35, 0.5, 0.65], [0, 1, 0]);
   const y2 = useTransform(scrollYProgress, [0.35, 0.5, 0.65], [50, 0, -50]);
 
-  // Level Two: 80% -> 95% "ELEGANCE REDEFINED"
-  // Aligns with the 2nd floor sequence
-  const opacity3 = useTransform(scrollYProgress, [0.8, 0.87, 0.95], [0, 1, 0]);
-  const y3 = useTransform(scrollYProgress, [0.8, 0.87, 0.95], [50, 0, -50]);
+  // Level Two: 75% -> 95% "ELEGANCE REDEFINED"
+  // Tuned to peak trigger exactly when 2nd floor starts (Frame 72 ≈ 0.75)
+  const opacity3 = useTransform(scrollYProgress, [0.75, 0.85, 0.95], [0, 1, 0]);
+  const y3 = useTransform(scrollYProgress, [0.75, 0.85, 0.95], [50, 0, -50]);
 
   // Footer opacity - reveals at the very end
   const footerOpacity = useTransform(scrollYProgress, [0.96, 1], [0, 1]);
@@ -29,14 +29,15 @@ export default function Home() {
   const maskOpacity = useTransform(scrollYProgress, [0.9, 1], [0, 1]);
 
   return (
-    <main className="relative h-[600vh] bg-forum-black">
+    <main className="relative h-[600vh] bg-forum-black text-forum-white font-sans selection:bg-forum-gold selection:text-forum-black">
       {/* Background Scroll Animation */}
       <ForumScroll />
 
       {/* Gradient Mask for Smooth Footer Transition */}
       <motion.div
         style={{ opacity: maskOpacity }}
-        className="fixed bottom-0 left-0 w-full h-96 bg-gradient-to-t from-forum-black via-forum-black/80 to-transparent z-10 pointer-events-none"
+        // Gradient from transparrent to black to bridge the gap
+        className="fixed bottom-0 left-0 w-full h-96 bg-gradient-to-t from-forum-black via-forum-black/90 to-transparent z-10 pointer-events-none"
       />
 
       {/* Fixed Text Container */}
@@ -45,9 +46,9 @@ export default function Home() {
         {/* Sequence 1: Entrance */}
         <motion.div
           style={{ opacity: opacity1, y: y1 }}
-          className="absolute text-center max-w-4xl px-4"
+          className="absolute text-center max-w-5xl px-4"
         >
-          <h1 className="text-5xl md:text-8xl font-serif text-forum-white mb-6">
+          <h1 className="text-5xl md:text-8xl font-serif text-forum-white mb-6 leading-tight">
             FORUM ANGREN
           </h1>
           <p className="text-xl md:text-2xl font-sans text-forum-gold tracking-[0.3em] uppercase">
@@ -82,29 +83,35 @@ export default function Home() {
         </motion.div>
       </div>
 
-      {/* High-End Footer */}
+      {/* High-End Flagship Footer */}
       <motion.footer
         style={{ opacity: footerOpacity, y: footerY }}
-        className="fixed bottom-0 left-0 w-full bg-forum-black z-30 py-16 px-8 md:px-24 border-t border-white/5"
+        className="fixed bottom-0 left-0 w-full bg-forum-black z-30 py-20 px-8 md:px-24 border-t border-white/5"
       >
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-10 md:space-y-0">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-12 md:space-y-0">
 
-          <div className="space-y-4">
-            <h3 className="font-serif text-3xl text-forum-white">FORUM <span className="text-forum-gold">ANGREN</span></h3>
-            <p className="text-forum-white/60 font-sans text-sm tracking-wide leading-relaxed">
+          {/* Brand & Address */}
+          <div className="space-y-6 max-w-md">
+            <h3 className="font-serif text-4xl text-forum-white">FORUM <span className="text-forum-gold">ANGREN</span></h3>
+            <p className="text-forum-white/60 font-sans text-base tracking-wide leading-relaxed">
               Forum Building, Angren City<br />
-              Tashkent Region.
+              Tashkent Region, Uzbekistan.
             </p>
+            <button className="group mt-4 px-8 py-3 border border-forum-gold text-forum-gold hover:bg-forum-gold hover:text-forum-black transition-all duration-300 font-sans tracking-widest uppercase text-xs">
+              Book a Personal Styling
+            </button>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-12 text-left md:text-right">
-            <div className="space-y-2">
-              <p className="text-forum-gold font-sans text-xs tracking-[0.2em] uppercase">Opening Hours</p>
+          {/* Info Columns */}
+          <div className="flex flex-col md:flex-row gap-16 text-left md:text-right">
+            <div className="space-y-3">
+              <p className="text-forum-gold font-sans text-xs tracking-[0.2em] uppercase mb-2">Opening Hours</p>
               <p className="text-forum-white font-sans text-sm">Mon - Sat: 10:00 — 21:00</p>
+              <p className="text-forum-white/60 font-sans text-sm">Sunday: Closed</p>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-forum-gold font-sans text-xs tracking-[0.2em] uppercase">Contact</p>
+            <div className="space-y-3">
+              <p className="text-forum-gold font-sans text-xs tracking-[0.2em] uppercase mb-2">Contact</p>
               <a href="tel:+998901234567" className="block text-forum-white font-sans text-sm hover:text-forum-gold transition-colors">
                 +998 90 123 45 67
               </a>
@@ -114,6 +121,12 @@ export default function Home() {
             </div>
           </div>
 
+        </div>
+
+        {/* Bottom copyright/line */}
+        <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-xs text-white/30 font-sans tracking-widest uppercase">
+          <span>© 2026 Forum Angren. All Rights Reserved.</span>
+          <span>Est. 2024</span>
         </div>
       </motion.footer>
 

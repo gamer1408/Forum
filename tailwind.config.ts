@@ -14,9 +14,9 @@ const config: Config = {
       },
       colors: {
         forum: {
-          black: "#0a0a0a",
+          black: "#050505",
           white: "#ffffff",
-          gold: "#d4af37",
+          gold: "#C5A059",
         },
       },
     },

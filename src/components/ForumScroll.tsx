@@ -16,13 +16,13 @@ export default function ForumScroll() {
 
     const { scrollYProgress } = useScroll();
 
+    // Adjusted damping to 40 for heavier feel
     const smoothProgress = useSpring(scrollYProgress, {
         stiffness: 100,
-        damping: 30,
+        damping: 40,
         restDelta: 0.001,
     });
 
-    // Helper to determine folder and file index based on global sequence index
     const getFrameData = (index: number) => {
         let folder = "";
         let localIndex = 0;
@@ -38,38 +38,31 @@ export default function ForumScroll() {
             localIndex = index - (ENTRANCE_FRAMES + STAIRS_FRAMES) + 1;
         }
 
-        // Format: ezgif-frame-001.jpg
         const filename = `ezgif-frame-${localIndex.toString().padStart(3, "0")}.jpg`;
         return `/assets/${folder}/${filename}`;
     };
 
     useEffect(() => {
-        const loadImages = async () => {
-            const imgArray: HTMLImageElement[] = new Array(TOTAL_FRAMES);
-            let count = 0;
+        const imgArray: HTMLImageElement[] = new Array(TOTAL_FRAMES);
+        let count = 0;
 
-            for (let i = 0; i < TOTAL_FRAMES; i++) {
-                const img = new Image();
-                img.src = getFrameData(i);
+        for (let i = 0; i < TOTAL_FRAMES; i++) {
+            const img = new Image();
+            img.src = getFrameData(i);
 
-                img.onload = () => {
-                    count++;
-                    setLoadedCount(count);
-                    if (count === TOTAL_FRAMES) setLoading(false);
-                };
-                img.onerror = () => {
-                    console.error(`Failed to load frame ${i}: ${img.src}`);
-                    // Still increment count so we don't hang forever
-                    count++;
-                    setLoadedCount(count);
-                    if (count === TOTAL_FRAMES) setLoading(false);
-                };
-                imgArray[i] = img;
-            }
-            setImages(imgArray);
-        };
-
-        loadImages();
+            img.onload = () => {
+                count++;
+                setLoadedCount(count);
+                if (count === TOTAL_FRAMES) setLoading(false);
+            };
+            img.onerror = () => {
+                count++; // Proceed anyway
+                setLoadedCount(count);
+                if (count === TOTAL_FRAMES) setLoading(false);
+            };
+            imgArray[i] = img;
+        }
+        setImages(imgArray);
     }, []);
 
     useEffect(() => {
@@ -78,19 +71,20 @@ export default function ForumScroll() {
             const ctx = canvas?.getContext("2d");
             if (!canvas || !ctx || images.length !== TOTAL_FRAMES) return;
 
+            // Enable High Quality Scaling
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "high";
+
             const frameIndex = Math.min(
                 TOTAL_FRAMES - 1,
                 Math.floor(latest * TOTAL_FRAMES)
             );
 
             const img = images[frameIndex];
-            // Only draw if image is fully loaded and valid
             if (img && img.complete && img.naturalWidth > 0) {
-                // Set canvas to full window size
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
 
-                // "Cover" logic
                 const hRatio = canvas.width / img.width;
                 const vRatio = canvas.height / img.height;
                 const ratio = Math.max(hRatio, vRatio);
@@ -106,7 +100,6 @@ export default function ForumScroll() {
             }
         });
 
-        // Force initial draw of frame 0 when not loading
         if (!loading && images.length > 0) {
             smoothProgress.set(0);
         }
@@ -115,10 +108,17 @@ export default function ForumScroll() {
     }, [smoothProgress, images, loading]);
 
     if (loading) {
+        const progress = (loadedCount / TOTAL_FRAMES) * 100;
         return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-forum-black text-forum-white">
-                <div className="text-4xl font-serif">
-                    {Math.round((loadedCount / TOTAL_FRAMES) * 100)}%
+            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-forum-black">
+                <div className="w-64 h-1 bg-gray-800 rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-forum-gold transition-all duration-300 ease-out"
+                        style={{ width: `${progress}%` }}
+                    />
+                </div>
+                <div className="mt-4 text-forum-gold font-serif text-sm tracking-widest">
+                    LOADING EXPERIENCE
                 </div>
             </div>
         );

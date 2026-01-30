@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Forum Angren | Digital Flagship
+
+A high-performance "Digital Flagship" experience for Forum Angren, featuring a scroll-linked 3D architectural journey.
+
+## Features
+- **Scroll-Linked Animation**: 96-frame seamless sequence using HTML5 Canvas.
+- **Retina/High-DPI Support**: Automatic scaling for modern displays (`window.devicePixelRatio`).
+- **Luxury UI**: Custom "Forum Gold" (#C5A059) & "Deep Black" (#050505) theme.
+- **Smart Loading**: Minimalist preloader with error resilience.
+- **Performance**: Optimized asset loading and high-quality image smoothing.
+
+## Tech Stack
+- **Framework**: Next.js 14
+- **Styling**: Tailwind CSS
+- **Animation**: Framer Motion
+- **Rendering**: HTML5 Canvas (2D Context)
+
+## Project Structure
+- `/public/assets/`: Contains image sequences (`entrance`, `stairs`, `second-floor`).
+- `/src/components/ForumScroll.tsx`: Core animation engine.
+- `/src/app/page.tsx`: Main layout, text triggers, and footer.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deployment
+Build for production:
+```bash
+npm run build
+```
+The output is optimized for Vercel or any static hosting.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+© 2026 Forum Angren. All Rights Reserved.

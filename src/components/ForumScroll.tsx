@@ -8,7 +8,10 @@ const ENTRANCE_FRAMES = 40;
 const STAIRS_FRAMES = 32;
 const SECOND_FLOOR_FRAMES = 24;
 const TOTAL_FRAMES = ENTRANCE_FRAMES + STAIRS_FRAMES + SECOND_FLOOR_FRAMES; // 96
-const SCROLL_DAMPING = 40; // Heavy, premium feel
+
+// Updated Physics for "Heavy" Architectural Feel
+const SCROLL_STIFFNESS = 60;
+const SCROLL_DAMPING = 45;
 
 export default function ForumScroll() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -19,7 +22,7 @@ export default function ForumScroll() {
     const { scrollYProgress } = useScroll();
 
     const smoothProgress = useSpring(scrollYProgress, {
-        stiffness: 100,
+        stiffness: SCROLL_STIFFNESS,
         damping: SCROLL_DAMPING,
         restDelta: 0.001,
     });
@@ -42,6 +45,7 @@ export default function ForumScroll() {
             localIndex = index - (ENTRANCE_FRAMES + STAIRS_FRAMES) + 1;
         }
 
+        // Ensure strict 3-digit padding: ezgif-frame-001.jpg
         const filename = `ezgif-frame-${localIndex.toString().padStart(3, "0")}.jpg`;
         return `/assets/${folder}/${filename}`;
     };
@@ -50,6 +54,7 @@ export default function ForumScroll() {
         const imgArray: HTMLImageElement[] = new Array(TOTAL_FRAMES);
         let count = 0;
 
+        // Preload all images
         for (let i = 0; i < TOTAL_FRAMES; i++) {
             const img = new Image();
             img.src = getFrameData(i);
@@ -60,9 +65,8 @@ export default function ForumScroll() {
                 if (count === TOTAL_FRAMES) setLoading(false);
             };
             img.onerror = () => {
-                console.warn(`Frame missing or broken: ${img.src}`);
+                console.warn(`Frame broken/missing: ${img.src}`);
                 setLoadedCount(prev => prev + 1);
-                // Do not block loading, just skip
                 if (count + 1 >= TOTAL_FRAMES) setLoading(false);
             };
             imgArray[i] = img;
@@ -106,9 +110,9 @@ export default function ForumScroll() {
             );
 
             const img = images[frameIndex];
-            // Check naturalWidth to avoid drawing broken images
+
             if (img && img.complete && img.naturalWidth > 0) {
-                // "Cover" logic (using logical width/height)
+                // "Cover" logic
                 const hRatio = width / img.width;
                 const vRatio = height / img.height;
                 const ratio = Math.max(hRatio, vRatio);
@@ -133,7 +137,18 @@ export default function ForumScroll() {
             renderFrame(smoothProgress.get());
         }
 
-        return () => unsubscribe();
+        // Handle resize
+        const onResize = () => {
+            if (!loading && images.length === TOTAL_FRAMES) {
+                renderFrame(smoothProgress.get());
+            }
+        };
+        window.addEventListener("resize", onResize);
+
+        return () => {
+            unsubscribe();
+            window.removeEventListener("resize", onResize);
+        };
     }, [smoothProgress, images, loading]);
 
     if (loading) {
@@ -142,7 +157,7 @@ export default function ForumScroll() {
             <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-forum-black">
                 <div className="w-64 h-0.5 bg-gray-900 overflow-hidden relative">
                     <div
-                        className="absolute top-0 left-0 h-full bg-forum-gold transition-all duration-200 ease-out"
+                        className="absolute top-0 left-0 h-full bg-forum-gold transition-all duration-300 ease-out"
                         style={{ width: `${progress}%` }}
                     />
                 </div>

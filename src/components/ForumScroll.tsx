@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useScroll, useSpring } from "framer-motion";
+import { useScroll, useSpring, useTransform } from "framer-motion";
 
 // Configuration Constants
 const ENTRANCE = 40;
@@ -9,7 +9,7 @@ const STAIRS = 32;
 const SECOND_FLOOR = 24;
 const TOTAL_FRAMES = ENTRANCE + STAIRS + SECOND_FLOOR; // 96
 
-// Updated Physics for "Premium Cinematic Weight" (Steady & Professional)
+// Updated Physics for "Premium Cinematic Weight"
 const SCROLL_STIFFNESS = 60;
 const SCROLL_DAMPING = 45;
 
@@ -21,7 +21,24 @@ export default function ForumScroll() {
 
     const { scrollYProgress } = useScroll();
 
-    const smoothProgress = useSpring(scrollYProgress, {
+    // Cinematic Non-Linear Mapping (The "Sticky" Logic)
+    // 0.00 -> 0.35: Play Entrance (Frames 0-39)
+    // 0.35 -> 0.55: FREEZE at Frame 39 (Read "Ground Floor")
+    // 0.55 -> 0.75: Play Stairs (Frames 40-71)
+    // 0.75 -> 0.90: FREEZE at Frame 71 (Read "Level Two")
+    // 0.90 -> 1.00: Play Second Floor (Frames 72-95)
+
+    // Normalize target frames to 0-1 range for the output
+    const frame39 = 39 / TOTAL_FRAMES;
+    const frame71 = 71 / TOTAL_FRAMES;
+
+    const cinematicProgress = useTransform(
+        scrollYProgress,
+        [0, 0.35, 0.55, 0.75, 0.90, 1],
+        [0, frame39, frame39, frame71, frame71, 1]
+    );
+
+    const smoothProgress = useSpring(cinematicProgress, {
         stiffness: SCROLL_STIFFNESS,
         damping: SCROLL_DAMPING,
         restDelta: 0.001,
@@ -35,20 +52,16 @@ export default function ForumScroll() {
         let localIndex = 0;
 
         if (index < ENTRANCE) {
-            // 0 - 39
             folder = "entrance";
             localIndex = index + 1;
         } else if (index < ENTRANCE + STAIRS) {
-            // 40 - 71
             folder = "stairs";
             localIndex = index - ENTRANCE + 1;
         } else {
-            // 72 - 95
             folder = "second-floor";
             localIndex = index - (ENTRANCE + STAIRS) + 1;
         }
 
-        // Ensure strict 3-digit padding: ezgif-frame-001.jpg
         const filename = `ezgif-frame-${localIndex.toString().padStart(3, "0")}.jpg`;
         return `/assets/${folder}/${filename}`;
     };
@@ -57,7 +70,6 @@ export default function ForumScroll() {
         const imgArray: HTMLImageElement[] = new Array(TOTAL_FRAMES);
         let count = 0;
 
-        // Preload all images
         for (let i = 0; i < TOTAL_FRAMES; i++) {
             const img = new Image();
             img.src = getFrameData(i);
@@ -102,7 +114,7 @@ export default function ForumScroll() {
                 canvas.style.height = `${height}px`;
             }
 
-            // Reset and Apply Scaling (Stateless approach)
+            // Reset and Apply Scaling
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
             // Force High Quality Smoothing
@@ -121,7 +133,6 @@ export default function ForumScroll() {
                 const imgW = img.naturalWidth;
                 const imgH = img.naturalHeight;
 
-                // "Cover" logic based on logical window dimensions
                 const hRatio = width / imgW;
                 const vRatio = height / imgH;
                 const ratio = Math.max(hRatio, vRatio);
@@ -150,7 +161,6 @@ export default function ForumScroll() {
             renderFrame(smoothProgress.get());
         }
 
-        // Handle resize
         const onResize = () => {
             if (!loading && images.length === TOTAL_FRAMES) {
                 renderFrame(smoothProgress.get());
@@ -175,7 +185,7 @@ export default function ForumScroll() {
                     />
                 </div>
                 <p className="mt-4 text-[10px] text-forum-gold/60 font-sans tracking-[0.2em] uppercase">
-                    Loading Experience
+                    FORUM ANGREN LOADING {Math.round(progress)}%
                 </p>
             </div>
         );

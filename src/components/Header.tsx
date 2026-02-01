@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 
 export default function Header() {
     const { scrollY } = useScroll();
-    const [isScrolled, setIsScrolled] = useState(false);
+
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     // Dynamic visuals based on scroll
@@ -28,11 +28,7 @@ export default function Header() {
         ["rgba(197, 160, 89, 0.6)", "#C5A059"]
     );
 
-    useEffect(() => {
-        return scrollY.on("change", (latest) => {
-            setIsScrolled(latest > 50);
-        });
-    }, [scrollY]);
+
 
     // Combined links for mobile menu
     const navLinks = [

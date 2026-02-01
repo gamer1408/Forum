@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { useScroll, useSpring } from "framer-motion";
 
 // Configuration Constants
-const ENTRANCE_FRAMES = 40;
-const STAIRS_FRAMES = 32;
-const SECOND_FLOOR_FRAMES = 24;
-const TOTAL_FRAMES = ENTRANCE_FRAMES + STAIRS_FRAMES + SECOND_FLOOR_FRAMES; // 96
+const ENTRANCE = 40;
+const STAIRS = 32;
+const SECOND_FLOOR = 24;
+const TOTAL_FRAMES = ENTRANCE + STAIRS + SECOND_FLOOR; // 96
 
-// Updated Physics for "Heavy" Architectural Feel
+// Updated Physics for "Heavy" Architectural Feel (Mass & Weight)
 const SCROLL_STIFFNESS = 60;
 const SCROLL_DAMPING = 45;
 
@@ -28,21 +28,24 @@ export default function ForumScroll() {
     });
 
     const getFrameData = (index: number) => {
+        // Prevent 404s by clamping index
+        if (index < 0 || index >= TOTAL_FRAMES) return "";
+
         let folder = "";
         let localIndex = 0;
 
-        if (index < ENTRANCE_FRAMES) {
+        if (index < ENTRANCE) {
             // 0 - 39
             folder = "entrance";
             localIndex = index + 1;
-        } else if (index < ENTRANCE_FRAMES + STAIRS_FRAMES) {
+        } else if (index < ENTRANCE + STAIRS) {
             // 40 - 71
             folder = "stairs";
-            localIndex = index - ENTRANCE_FRAMES + 1;
+            localIndex = index - ENTRANCE + 1;
         } else {
             // 72 - 95
             folder = "second-floor";
-            localIndex = index - (ENTRANCE_FRAMES + STAIRS_FRAMES) + 1;
+            localIndex = index - (ENTRANCE + STAIRS) + 1;
         }
 
         // Ensure strict 3-digit padding: ezgif-frame-001.jpg
@@ -80,26 +83,27 @@ export default function ForumScroll() {
             const ctx = canvas?.getContext("2d", { alpha: false });
             if (!canvas || !ctx || images.length !== TOTAL_FRAMES) return;
 
-            // Device Pixel Ratio for Retina Displays
             const dpr = window.devicePixelRatio || 1;
-
             const width = window.innerWidth;
             const height = window.innerHeight;
 
-            // Resize logic using physical pixels
+            // Manage Physical Dimensions
             if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
                 canvas.width = width * dpr;
                 canvas.height = height * dpr;
-                ctx.scale(dpr, dpr); // Scale context to match
             }
 
-            // Ensure style matches window size
+            // Sync CSS Dimensions
             if (canvas.style.width !== `${width}px` || canvas.style.height !== `${height}px`) {
                 canvas.style.width = `${width}px`;
                 canvas.style.height = `${height}px`;
             }
 
-            // Force High Quality Smoothing
+            // Reset and Apply Scaling (Stateless approach)
+            // This ensures logic is always correct even if context state drifts
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            // High Quality Smoothing
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = "high";
 
@@ -112,18 +116,22 @@ export default function ForumScroll() {
             const img = images[frameIndex];
 
             if (img && img.complete && img.naturalWidth > 0) {
-                // "Cover" logic
+                // "Cover" logic based on logical pixels (since we scaled ctx)
                 const hRatio = width / img.width;
                 const vRatio = height / img.height;
                 const ratio = Math.max(hRatio, vRatio);
-                const centerShift_x = (width - img.width * ratio) / 2;
-                const centerShift_y = (height - img.height * ratio) / 2;
+
+                const finalWidth = img.width * ratio;
+                const finalHeight = img.height * ratio;
+
+                const centerShift_x = (width - finalWidth) / 2;
+                const centerShift_y = (height - finalHeight) / 2;
 
                 ctx.clearRect(0, 0, width, height);
                 ctx.drawImage(
                     img,
                     0, 0, img.width, img.height,
-                    centerShift_x, centerShift_y, img.width * ratio, img.height * ratio
+                    centerShift_x, centerShift_y, finalWidth, finalHeight
                 );
             }
         };

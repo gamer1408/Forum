@@ -91,7 +91,7 @@ export default function Home() {
             NAFOSAT VA ELEGANTLIK
           </h2>
           <p className="text-sm md:text-xl font-sans text-forum-white/80 max-w-xl leading-relaxed">
-            Ayollar modasining eng nafis namunalari, avangard dizayn va o'zgacha uslublar jamlanmasi.
+            Ayollar modasining eng nafis namunalari, avangard dizayn va o&apos;zgacha uslublar jamlanmasi.
           </p>
         </motion.div>
 

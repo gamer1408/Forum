@@ -9,7 +9,7 @@ const STAIRS = 32;
 const SECOND_FLOOR = 24;
 const TOTAL_FRAMES = ENTRANCE + STAIRS + SECOND_FLOOR; // 96
 
-// Updated Physics for "Heavy" Architectural Feel (Mass & Weight)
+// Updated Physics for "Premium Cinematic Weight" (Steady & Professional)
 const SCROLL_STIFFNESS = 60;
 const SCROLL_DAMPING = 45;
 
@@ -87,10 +87,13 @@ export default function ForumScroll() {
             const width = window.innerWidth;
             const height = window.innerHeight;
 
+            const physicalWidth = width * dpr;
+            const physicalHeight = height * dpr;
+
             // Manage Physical Dimensions
-            if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-                canvas.width = width * dpr;
-                canvas.height = height * dpr;
+            if (canvas.width !== physicalWidth || canvas.height !== physicalHeight) {
+                canvas.width = physicalWidth;
+                canvas.height = physicalHeight;
             }
 
             // Sync CSS Dimensions
@@ -100,10 +103,9 @@ export default function ForumScroll() {
             }
 
             // Reset and Apply Scaling (Stateless approach)
-            // This ensures logic is always correct even if context state drifts
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-            // High Quality Smoothing
+            // Force High Quality Smoothing
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = "high";
 
@@ -116,13 +118,16 @@ export default function ForumScroll() {
             const img = images[frameIndex];
 
             if (img && img.complete && img.naturalWidth > 0) {
-                // "Cover" logic based on logical pixels (since we scaled ctx)
-                const hRatio = width / img.width;
-                const vRatio = height / img.height;
+                const imgW = img.naturalWidth;
+                const imgH = img.naturalHeight;
+
+                // "Cover" logic based on logical window dimensions
+                const hRatio = width / imgW;
+                const vRatio = height / imgH;
                 const ratio = Math.max(hRatio, vRatio);
 
-                const finalWidth = img.width * ratio;
-                const finalHeight = img.height * ratio;
+                const finalWidth = imgW * ratio;
+                const finalHeight = imgH * ratio;
 
                 const centerShift_x = (width - finalWidth) / 2;
                 const centerShift_y = (height - finalHeight) / 2;
@@ -130,7 +135,7 @@ export default function ForumScroll() {
                 ctx.clearRect(0, 0, width, height);
                 ctx.drawImage(
                     img,
-                    0, 0, img.width, img.height,
+                    0, 0, imgW, imgH,
                     centerShift_x, centerShift_y, finalWidth, finalHeight
                 );
             }

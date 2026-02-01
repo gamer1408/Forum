@@ -52,7 +52,7 @@ export default function Home() {
             FORUM <span className="text-forum-gold italic">ANGREN</span>
           </h1>
           <div className="h-px w-24 bg-forum-gold mb-8 opacity-60" />
-          <p className="text-sm md:text-lg font-sans text-forum-white/80 tracking-[0.4em] uppercase drop-shadow-lg">
+          <p className="text-sm md:text-lg font-sans text-forum-white/80 tracking-[0.3em] uppercase drop-shadow-lg">
             The Digital Flagship
           </p>
         </motion.div>
@@ -103,7 +103,7 @@ export default function Home() {
 
           {/* Column 1: Visit */}
           <div className="space-y-4">
-            <h4 className="text-forum-gold font-sans text-xs tracking-[0.2em] uppercase mb-2 border-b border-white/10 pb-2 inline-block">
+            <h4 className="text-forum-gold font-sans text-xs tracking-[0.3em] uppercase mb-2 border-b border-white/10 pb-2 inline-block">
               Visit Us
             </h4>
             <div className="text-forum-white/80 font-serif text-lg leading-relaxed">
@@ -113,15 +113,15 @@ export default function Home() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="mt-6 px-8 py-3 border border-forum-gold text-forum-gold hover:bg-forum-gold hover:text-forum-black transition-all duration-300 font-sans text-xs tracking-[0.2em] uppercase"
+              className="mt-6 px-8 py-3 border border-forum-gold text-forum-gold hover:bg-forum-gold hover:text-forum-black transition-all duration-300 font-sans text-xs tracking-[0.3em] uppercase"
             >
-              Book an Appointment
+              Contact Concierge
             </motion.button>
           </div>
 
           {/* Column 2: Contact */}
           <div className="space-y-4">
-            <h4 className="text-forum-gold font-sans text-xs tracking-[0.2em] uppercase mb-2 border-b border-white/10 pb-2 inline-block">
+            <h4 className="text-forum-gold font-sans text-xs tracking-[0.3em] uppercase mb-2 border-b border-white/10 pb-2 inline-block">
               Contact
             </h4>
             <div className="space-y-2 text-forum-white/80 font-sans text-sm tracking-wide">
@@ -136,7 +136,7 @@ export default function Home() {
 
           {/* Column 3: Hours */}
           <div className="space-y-4">
-            <h4 className="text-forum-gold font-sans text-xs tracking-[0.2em] uppercase mb-2 border-b border-white/10 pb-2 inline-block">
+            <h4 className="text-forum-gold font-sans text-xs tracking-[0.3em] uppercase mb-2 border-b border-white/10 pb-2 inline-block">
               Opening Hours
             </h4>
             <ul className="space-y-2 text-forum-white/80 font-sans text-sm tracking-wide">
@@ -154,7 +154,7 @@ export default function Home() {
         </div>
 
         {/* Copyright */}
-        <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] text-white/20 font-sans tracking-[0.2em] uppercase">
+        <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] text-white/20 font-sans tracking-[0.3em] uppercase">
           <span>© 2026 Forum Angren. All Rights Reserved.</span>
           <span className="mt-2 md:mt-0">Est. 2024 • Designed in Tashkent</span>
         </div>
@@ -166,7 +166,7 @@ export default function Home() {
         className="fixed bottom-12 left-1/2 -translate-x-1/2 text-forum-gold/40 flex flex-col items-center gap-4 pointer-events-none z-20"
       >
         <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-forum-gold to-transparent" />
-        <span className="text-[10px] font-sans tracking-[0.4em] uppercase">Explore</span>
+        <span className="text-[10px] font-sans tracking-[0.3em] uppercase">Explore</span>
       </motion.div>
     </main>
   );
